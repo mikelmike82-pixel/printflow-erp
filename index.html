@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrintFlow ERP</title>
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+
+  <!-- Login screen -->
+  <div class="login-screen" id="login-screen">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="brand-mark">PF</div>
+        <div>
+          <div class="brand-name">PrintFlow ERP</div>
+          <div class="brand-sub">CRM &amp; Printing Production</div>
+        </div>
+      </div>
+      <form id="login-form">
+        <div class="form-field">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" autocomplete="username" required />
+        </div>
+        <div class="form-field">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" autocomplete="current-password" required />
+        </div>
+        <div id="login-error" class="hint" style="color:var(--danger-fg); display:none; margin-bottom:12px;"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%; padding:10px;">Sign In</button>
+      </form>
+      <div class="login-hint">
+        <strong>Phase 1 demo — mock accounts</strong><br />
+        Super Admin: ahmed@printflow.demo<br />
+        Sales &amp; CRM: sara@printflow.demo<br />
+        Production: bilal@printflow.demo<br />
+        Accounts: nida@printflow.demo<br />
+        Password for all: <span class="mono">demo123</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main app shell -->
+  <div id="app-root">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-mark">PF</div>
+        <div class="brand-name">PrintFlow ERP</div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav"></nav>
+      <div class="sidebar-footer">Phase 1 Demo · Mock Data</div>
+    </aside>
+
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+        <div class="topbar-right">
+          <div class="user-chip">
+            <div class="user-avatar" id="user-avatar">–</div>
+            <div>
+              <div id="user-name" style="font-weight:600;">–</div>
+              <div id="user-role" class="text-muted" style="font-size:11px;">–</div>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="logout-btn">Log Out</button>
+        </div>
+      </header>
+      <main class="content-scroll" id="content"></main>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

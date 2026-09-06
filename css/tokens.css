@@ -1,0 +1,94 @@
+/* =========================================================
+   Design tokens — single deliberate accent, neutral surfaces.
+   Do not add per-module colors here. If a new module needs a
+   status color, reuse --danger/--warning/--success below —
+   never invent a new hue for a card or section.
+   ========================================================= */
+:root {
+  /* Accent — one color, used sparingly (active nav, primary buttons,
+     focus rings, links, top-border on key totals) */
+  --accent-50:  #eef3f8;
+  --accent-100: #d6e3ee;
+  --accent-300: #7fa3c2;
+  --accent-500: #2b5a82;
+  --accent-600: #234a6b;
+  --accent-700: #1c3a54;
+
+  /* Neutrals */
+  --gray-0:   #ffffff;
+  --gray-25:  #fafbfc;
+  --gray-50:  #f5f6f8;
+  --gray-100: #eceef1;
+  --gray-200: #dde1e6;
+  --gray-300: #c3c9d1;
+  --gray-400: #9aa2ad;
+  --gray-500: #717986;
+  --gray-600: #545b66;
+  --gray-700: #3a4048;
+  --gray-800: #262a30;
+  --gray-900: #16181c;
+
+  /* Functional colors — used ONLY for real semantic meaning
+     (warnings, errors, success, overdue) — never decoration */
+  --success-fg: #1e6b45;
+  --success-bg: #e8f5ee;
+  --success-bd: #b8dfc9;
+
+  --warning-fg: #8a5a00;
+  --warning-bg: #fdf3e0;
+  --warning-bd: #f0d497;
+
+  --danger-fg:  #a3271f;
+  --danger-bg:  #fbeae8;
+  --danger-bd:  #f0bcb6;
+
+  --info-fg:    var(--accent-700);
+  --info-bg:    var(--accent-50);
+  --info-bd:    var(--accent-100);
+
+  /* Text */
+  --text-primary:   var(--gray-900);
+  --text-secondary: var(--gray-600);
+  --text-muted:     var(--gray-400);
+  --text-inverse:   #ffffff;
+
+  /* Surfaces */
+  --surface-app:    var(--gray-50);
+  --surface-card:   var(--gray-0);
+  --surface-sunken: var(--gray-25);
+  --border-default: var(--gray-200);
+  --border-strong:  var(--gray-300);
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+
+  --text-xs:   12px;
+  --text-sm:   13px;
+  --text-base: 14px;
+  --text-md:   15px;
+  --text-lg:   18px;
+  --text-xl:   22px;
+  --text-2xl:  28px;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Layout */
+  --sidebar-width: 240px;
+  --topbar-height: 56px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  --shadow-sm: 0 1px 2px rgba(16, 24, 32, 0.06);
+  --shadow-md: 0 2px 8px rgba(16, 24, 32, 0.08);
+  --shadow-lg: 0 8px 24px rgba(16, 24, 32, 0.14);
+}
