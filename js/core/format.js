@@ -49,6 +49,12 @@ export function formatDateTime(isoDateTimeStr) {
   });
 }
 
+export function addDays(isoDateStr, days) {
+  const d = parseLocalDate(isoDateStr);
+  d.setDate(d.getDate() + days);
+  return localDateToISO(d);
+}
+
 export function daysBetween(isoDateStrA, isoDateStrB = todayLocalISO()) {
   const a = parseLocalDate(isoDateStrA);
   const b = parseLocalDate(isoDateStrB);

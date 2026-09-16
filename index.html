@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PrintFlow ERP</title>
+  <meta name="theme-color" content="#062854" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="assets/icon-48.png" />
+  <link rel="apple-touch-icon" href="assets/icon-192.png" />
+  <title>Axe Printing Solutions — ERP</title>
   <link rel="stylesheet" href="css/tokens.css" />
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/layout.css" />
@@ -11,36 +15,49 @@
 </head>
 <body>
 
-  <!-- Login screen -->
+  <!-- Login screen — two-panel layout: the form on the left, and a dark
+       hero panel with an animated line-field background on the right
+       (reproduces a reference design in plain CSS/HTML/JS — no
+       framework/build step; the animated lines are built at runtime by
+       js/core/loginFx.js instead of framer-motion). The hero panel
+       hides below 860px (see css/layout.css), leaving just the form on
+       mobile. Only the existing email/password login + forgot-password
+       link appear here — no social sign-in buttons. -->
   <div class="login-screen" id="login-screen">
-    <div class="login-card">
-      <div class="login-brand">
-        <div class="brand-mark">PF</div>
-        <div>
-          <div class="brand-name">PrintFlow ERP</div>
-          <div class="brand-sub">CRM &amp; Printing Production</div>
+    <div class="login-form-panel">
+      <div class="login-form-inner">
+        <div class="login-mini-brand">
+          <img src="assets/logo-icon-transparent.png" alt="" class="login-mini-brand-icon" />
+          <span>Axe Printing Solutions</span>
+        </div>
+        <h1 class="login-heading">Welcome back</h1>
+        <p class="login-subheading">Sign in to continue to your ERP dashboard.</p>
+        <form id="login-form">
+          <div class="form-field login-field">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" autocomplete="username" placeholder="Enter your email" required />
+          </div>
+          <div class="form-field login-field login-password-field">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" autocomplete="current-password" placeholder="Enter your password" required />
+            <button type="button" class="login-password-toggle" id="login-password-toggle" aria-label="Show password">Show</button>
+          </div>
+          <div class="login-forgot"><a href="#" id="forgot-password-link">Forgot Password?</a></div>
+          <div id="login-error" class="hint" style="color:var(--danger-fg); display:none; margin-bottom:12px;"></div>
+          <button type="submit" class="btn btn-primary login-submit-btn">Login</button>
+        </form>
+        <div class="login-hint">
+          <strong>Phase 1 demo — mock accounts</strong><br />
+          Super Admin: ahmed@axeprinting.demo<br />
+          Sales: sara@axeprinting.demo<br />
+          Production: bilal@axeprinting.demo<br />
+          Accounts: nida@axeprinting.demo<br />
+          Password for all: <span class="mono">demo123</span>
         </div>
       </div>
-      <form id="login-form">
-        <div class="form-field">
-          <label for="login-email">Email</label>
-          <input type="email" id="login-email" autocomplete="username" required />
-        </div>
-        <div class="form-field">
-          <label for="login-password">Password</label>
-          <input type="password" id="login-password" autocomplete="current-password" required />
-        </div>
-        <div id="login-error" class="hint" style="color:var(--danger-fg); display:none; margin-bottom:12px;"></div>
-        <button type="submit" class="btn btn-primary" style="width:100%; padding:10px;">Sign In</button>
-      </form>
-      <div class="login-hint">
-        <strong>Phase 1 demo — mock accounts</strong><br />
-        Super Admin: ahmed@printflow.demo<br />
-        Sales &amp; CRM: sara@printflow.demo<br />
-        Production: bilal@printflow.demo<br />
-        Accounts: nida@printflow.demo<br />
-        Password for all: <span class="mono">demo123</span>
-      </div>
+    </div>
+    <div class="login-hero-panel">
+      <div class="login-hero-lines" id="login-hero-lines"></div>
     </div>
   </div>
 
@@ -48,16 +65,22 @@
   <div id="app-root">
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <div class="brand-mark">PF</div>
-        <div class="brand-name">PrintFlow ERP</div>
+        <div class="brand-mark"><img src="assets/logo-icon.png" alt="" /></div>
+        <div class="brand-name">Axe Printing</div>
       </div>
       <nav class="sidebar-nav" id="sidebar-nav"></nav>
       <div class="sidebar-footer">Phase 1 Demo · Mock Data</div>
     </aside>
 
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
     <div class="main-area">
       <header class="topbar">
-        <div class="topbar-title" id="topbar-title">Dashboard</div>
+        <div style="display:flex; align-items:center; gap:12px; min-width:0;">
+          <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+          </button>
+          <div class="topbar-title" id="topbar-title">Dashboard</div>
+        </div>
         <div class="topbar-right">
           <div class="user-chip">
             <div class="user-avatar" id="user-avatar">–</div>

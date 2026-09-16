@@ -46,7 +46,12 @@ export function openModal({ title, bodyHtml, onMount, size = "" }) {
   root.querySelector("[data-close-overlay]").addEventListener("click", (e) => {
     if (e.target.hasAttribute("data-close-overlay")) closeModal();
   });
-  root.querySelector("[data-close-modal]").addEventListener("click", closeModal);
+  // IMPORTANT: querySelectorAll, not querySelector — every modal has at
+  // least two elements sharing this attribute (the header × button, and
+  // a "Cancel" button in the body). A plain querySelector only ever binds
+  // the first one, which silently left every Cancel button in the app
+  // non-functional. Bind all of them, every time.
+  root.querySelectorAll("[data-close-modal]").forEach((el) => el.addEventListener("click", closeModal));
   if (onMount) onMount(root);
 }
 

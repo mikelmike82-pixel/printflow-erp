@@ -1,39 +1,92 @@
 /* App shell layout: login screen, sidebar, topbar, content area */
 
+/* Login screen — two-panel layout: the form on one side, and a dark
+   hero panel with an animated line-field background on the other (a
+   plain-CSS/HTML/JS reproduction of a reference design — this project
+   has no build step, so the animated lines are a runtime-built SVG,
+   see js/core/loginFx.js, instead of framer-motion, and the
+   reference's quote block carries the logo instead of a testimonial).
+   The hero panel hides below 860px, leaving just the centered form. */
 .login-screen {
   min-height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--gray-900);
-  background-image: linear-gradient(160deg, var(--gray-900) 0%, var(--accent-700) 130%);
+  background: var(--gray-0);
 }
-.login-card {
-  width: 380px;
-  max-width: calc(100vw - 32px);
-  background: var(--surface-card);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  padding: var(--space-8) var(--space-6) var(--space-6);
-}
-.login-brand {
+
+.login-form-panel {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-6);
+  justify-content: center;
+  padding: var(--space-6);
 }
-.login-brand .brand-mark {
-  width: 36px; height: 36px;
+.login-form-panel::before {
+  content: "";
+  position: absolute;
+  top: -15%; right: -10%;
+  width: 55%; height: 65%;
+  background: radial-gradient(circle, var(--accent-100), transparent 70%);
+  opacity: 0.7;
+  pointer-events: none;
+}
+.login-form-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 380px;
+  animation: loginFadeUp 0.5s ease both;
+}
+.login-mini-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-8);
+}
+.login-mini-brand-icon { width: 30px; height: 30px; object-fit: contain; flex-shrink: 0; }
+.login-mini-brand span { font-weight: 700; font-size: var(--text-sm); color: var(--text-primary); }
+
+.login-heading {
+  font-size: 30px; font-weight: 800; letter-spacing: -0.01em;
+  color: var(--text-primary); margin-bottom: var(--space-2);
+}
+.login-subheading { color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-6); }
+
+.login-field { margin-bottom: var(--space-4); }
+.login-field label {
+  display: block; font-size: var(--text-xs); font-weight: 600;
+  color: var(--text-secondary); margin-bottom: 6px;
+}
+.login-field input {
+  width: 100%;
+  background: var(--gray-50);
+  border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
-  background: var(--accent-600);
-  color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: var(--text-md);
+  padding: 12px 14px;
+  font-size: var(--text-sm);
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
-.login-brand .brand-name { font-size: var(--text-lg); font-weight: 700; }
-.login-brand .brand-sub { font-size: var(--text-xs); color: var(--text-muted); }
+.login-field input:focus {
+  outline: none;
+  border-color: var(--accent-300);
+  background: var(--gray-0);
+  box-shadow: 0 0 0 3px var(--accent-100);
+}
+.login-password-field { position: relative; }
+.login-password-field input { padding-right: 46px; }
+.login-password-toggle {
+  position: absolute; right: 10px; bottom: 11px;
+  background: none; border: none; cursor: pointer; padding: 4px 6px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+  line-height: 1; color: var(--text-muted);
+}
+.login-forgot { text-align: right; margin: -6px 0 var(--space-5); }
+.login-forgot a { font-size: var(--text-sm); font-weight: 600; color: var(--accent-600); text-decoration: none; }
+.login-forgot a:hover { text-decoration: underline; }
+.login-submit-btn { width: 100%; padding: 12px; font-size: var(--text-md); }
 .login-hint {
-  margin-top: var(--space-5);
+  margin-top: var(--space-6);
   padding: var(--space-3);
   background: var(--surface-sunken);
   border: 1px solid var(--border-default);
@@ -41,6 +94,57 @@
   font-size: var(--text-xs);
   color: var(--text-secondary);
   line-height: 1.5;
+}
+
+/* Hero panel: just a dark navy gradient with a field of soft animated
+   lines drifting across it (built at runtime, see js/core/loginFx.js)
+   — standing in for the reference's photo/pattern background. Kept
+   deliberately free of any text or logo. */
+.login-hero-panel {
+  flex: 1;
+  position: relative;
+  margin: 14px 14px 14px 0;
+  border-radius: 28px;
+  overflow: hidden;
+  background: linear-gradient(165deg, var(--accent-700) 0%, var(--gray-900) 78%);
+}
+.login-hero-lines {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.login-lines-svg { width: 100%; height: 100%; }
+.login-line-path {
+  fill: none;
+  stroke-dasharray: 300;
+  animation-name: loginLineFlow;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes loginLineFlow {
+  0% { stroke-dashoffset: 300; }
+  100% { stroke-dashoffset: -300; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .login-line-path { animation: none; }
+}
+
+@keyframes loginFadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .login-form-inner { animation: none; }
+}
+
+@media (max-width: 860px) {
+  .login-hero-panel { display: none; }
+  .login-form-panel { padding: var(--space-5); }
+}
+@media (max-width: 420px) {
+  .login-mini-brand { margin-bottom: var(--space-6); }
+  .login-heading { font-size: 26px; }
 }
 
 #app-root { display: none; min-height: 100vh; }
@@ -63,12 +167,14 @@
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .sidebar-brand .brand-mark {
-  width: 28px; height: 28px; border-radius: var(--radius-sm);
-  background: var(--accent-500); color: #fff;
+  width: 30px; height: 30px; border-radius: var(--radius-sm);
+  background: #fff;
   display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: var(--text-sm);
+  flex-shrink: 0;
+  padding: 3px;
 }
-.sidebar-brand .brand-name { color: #fff; font-weight: 600; font-size: var(--text-md); }
+.sidebar-brand .brand-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.sidebar-brand .brand-name { color: #fff; font-weight: 600; font-size: var(--text-md); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .sidebar-nav { flex: 1; overflow-y: auto; padding: var(--space-3) var(--space-2); }
 .sidebar-group { margin-bottom: var(--space-3); }
@@ -141,8 +247,37 @@
 .page-subtitle { color: var(--text-secondary); font-size: var(--text-sm); margin-top: 2px; }
 .page-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 
+/* Hamburger menu toggle — hidden on desktop, shown only below the
+   sidebar's collapse breakpoint (see the max-width:900px block below). */
+.sidebar-toggle {
+  display: none;
+  flex-direction: column; justify-content: center; gap: 4px;
+  width: 34px; height: 34px; padding: 0; flex-shrink: 0;
+  background: transparent; border: 1px solid var(--border-strong); border-radius: var(--radius-md);
+  cursor: pointer;
+}
+.sidebar-toggle span { display: block; width: 16px; height: 2px; background: var(--text-primary); margin: 0 auto; border-radius: 1px; }
+
+.sidebar-backdrop {
+  display: none;
+  position: fixed; inset: 0; background: rgba(15, 20, 26, 0.45);
+  z-index: 39; opacity: 0; transition: opacity .15s ease;
+}
+.sidebar-backdrop.visible { display: block; opacity: 1; }
+
 @media (max-width: 900px) {
-  .sidebar { position: fixed; z-index: 40; transform: translateX(-100%); transition: transform .15s ease; }
+  .sidebar-toggle { display: flex; }
+  .sidebar { position: fixed; z-index: 40; top: 0; bottom: 0; transform: translateX(-100%); transition: transform .15s ease; }
   .sidebar.open { transform: translateX(0); }
   #app-root.active { display: block; }
+  .content-scroll { padding: var(--space-4); }
+  .topbar { padding: 0 var(--space-3); }
+  .topbar .user-chip > div { display: none; }
+}
+
+@media (max-width: 600px) {
+  .content-scroll { padding: var(--space-3); }
+  .page-header { flex-direction: column; align-items: stretch; }
+  .page-actions { width: 100%; }
+  .page-actions .btn { flex: 1; }
 }

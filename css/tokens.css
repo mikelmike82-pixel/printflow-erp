@@ -6,13 +6,16 @@
    ========================================================= */
 :root {
   /* Accent — one color, used sparingly (active nav, primary buttons,
-     focus rings, links, top-border on key totals) */
-  --accent-50:  #eef3f8;
-  --accent-100: #d6e3ee;
-  --accent-300: #7fa3c2;
-  --accent-500: #2b5a82;
-  --accent-600: #234a6b;
-  --accent-700: #1c3a54;
+     focus rings, links, top-border on key totals). Derived from the Axe
+     Printing Solutions logo's navy wordmark color (#062854), not picked
+     arbitrarily — swap these six values if the brand color ever changes,
+     nothing else in the design system needs to. */
+  --accent-50:  #f4f6f8;
+  --accent-100: #dee5ed;
+  --accent-300: #296bc1;
+  --accent-500: #0b3e80;
+  --accent-600: #062854;
+  --accent-700: #041e3f;
 
   /* Neutrals */
   --gray-0:   #ffffff;
