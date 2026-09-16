@@ -68,23 +68,45 @@ a PDF instead of ink on paper, but the pause/detect/release plumbing is
 exactly what a real printer will use. Re-run the installer and pick
 the real printer once one is connected — nothing else needs to change.
 
+## The ERP now starts itself too
+
+The installer doesn't just set up the printer side — its last step also
+registers the ERP's own local server (`serve.py`) as a second scheduled
+task, `AxeErpLocalServer`, running hidden in the background and starting
+at every login (needs Python on this computer; the installer says so and
+skips this step if it can't find it). Combined with the print-agent, that
+means after running the installer once, **nothing needs to be manually
+started ever again** — log in, print from any application, and the ERP's
+New Print Job screen pops up on its own, exactly as if someone had it open
+already. A "Axe Printing ERP" shortcut is also dropped on the Desktop for
+opening it by hand anytime (checking the dashboard, billing, etc.).
+
+If you'd rather test it the old manual way (one foreground window you can
+watch the output of), `Test-With-Your-Printer.bat` in the project root
+still works — it runs the installer for you the first time, then falls
+back to running `serve.py` in a visible window only if the background
+task isn't there for some reason.
+
 ## Files
 
 - `Install.bat` — double-click to install/reconfigure. Asks for admin
-  permission once (needed to pause printers), then walks through setup.
+  permission once (needed to pause printers), then walks through setup,
+  including registering the ERP's own auto-start (see above).
 - `install-axe-print-bridge.ps1` — the actual installer (safe to re-run
   to change the ERP address or which printers are gated).
 - `print-agent.ps1` — the background agent: polls gated printers for new
   held jobs, opens the ERP, and runs a small local listener
   (`127.0.0.1:8899`) the ERP calls to release a confirmed job (or discard
   one it shouldn't print). Copied into `C:\AxePrintBridge` and started
-  automatically at every login. Remembers which jobs it's already
-  notified you about in `C:\AxePrintBridge\seen-jobs.json`, so a held job
-  you haven't dealt with yet doesn't re-pop-up the ERP screen every time
-  the agent restarts (a reboot, or re-running `Install.bat`) — only once
-  per job, until it's confirmed, discarded, or removed by hand.
-- `Uninstall.bat` — resumes (un-pauses) the gated printers and removes
-  the scheduled task/agent.
+  automatically at every login as the `AxePrintBridgeAgent` scheduled
+  task. Remembers which jobs it's already notified you about in
+  `C:\AxePrintBridge\seen-jobs.json`, so a held job you haven't dealt
+  with yet doesn't re-pop-up the ERP screen every time the agent restarts
+  (a reboot, or re-running `Install.bat`) — only once per job, until it's
+  confirmed, discarded, or removed by hand.
+- `Uninstall.bat` — resumes (un-pauses) the gated printers, and removes
+  both scheduled tasks (`AxePrintBridgeAgent` and `AxeErpLocalServer`)
+  along with the Desktop shortcut.
 
 ## After installing
 

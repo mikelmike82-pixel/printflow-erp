@@ -12,8 +12,14 @@
 #      printers' queues and releases a job once you confirm it in the ERP.
 #   5. Registers a scheduled task so the agent starts automatically every
 #      time you log in, and starts it immediately.
+#   6. Also registers a second scheduled task that runs the ERP's own local
+#      web server (serve.py) hidden in the background, starting at every
+#      login - so once this installer has run once, nothing needs to be
+#      manually started ever again: log in, print from any application,
+#      and the ERP pops up on its own. Also drops an "Axe Printing ERP"
+#      shortcut on the Desktop for opening it by hand any other time.
 #
-# Safe to re-run - it removes and recreates its own scheduled task each
+# Safe to re-run - it removes and recreates its own scheduled tasks each
 # time, and cleans up the older v1 "Axe Printing ERP" virtual printer if
 # you'd installed that first (this version doesn't need it).
 
@@ -77,11 +83,13 @@ Write-Host "(This is the address from the README - e.g. http://localhost:8000)"
 $typed = Read-Host "ERP address [$defaultUrl]"
 if ([string]::IsNullOrWhiteSpace($typed)) { $typed = $defaultUrl }
 $erpUrl = $typed.TrimEnd("/")
-Write-Host "[1/5] ERP address: $erpUrl"
+$erpPort = 8000
+if ($erpUrl -match ':(\d+)\s*$') { $erpPort = [int]$Matches[1] }
+Write-Host "[1/6] ERP address: $erpUrl"
 
 # --- 2. Pick which real printers to gate ------------------------------------
 Write-Host ""
-Write-Host "[2/5] Looking at the printers on this computer..."
+Write-Host "[2/6] Looking at the printers on this computer..."
 
 # NOTE: every list below is forced into an array with @(...). Without that,
 # PowerShell turns a zero-match Where-Object result into a plain $null instead
@@ -150,7 +158,7 @@ if ($selectedNames.Count -eq 0) {
 
 # --- 3. Pause the selected printers ------------------------------------------
 Write-Host ""
-Write-Host "[3/5] Pausing the selected printer(s) so jobs hold for the ERP..."
+Write-Host "[3/6] Pausing the selected printer(s) so jobs hold for the ERP..."
 foreach ($name in $selectedNames) {
     $wmiPrinter = Get-CimInstance Win32_Printer -Filter "Name='$($name -replace "'", "''")'" -ErrorAction SilentlyContinue
     if ($wmiPrinter) {
@@ -168,13 +176,13 @@ foreach ($name in $selectedNames) {
 
 # --- 4. Install the agent -----------------------------------------------------
 Write-Host ""
-Write-Host "[4/5] Installing the background agent..."
+Write-Host "[4/6] Installing the background agent..."
 Copy-Item -Path $AgentSrc -Destination $AgentDst -Force
 Write-Host "      Copied to $AgentDst"
 
 # --- 5. Scheduled task ---------------------------------------------------------
 Write-Host ""
-Write-Host "[5/5] Setting the agent to start automatically at logon..."
+Write-Host "[5/6] Setting the agent to start automatically at logon..."
 Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
 
 $action = New-ScheduledTaskAction -Execute "powershell.exe" `
@@ -195,6 +203,66 @@ Get-CimInstance Win32_Process -Filter "Name = 'powershell.exe'" -ErrorAction Sil
 Start-ScheduledTask -TaskName $TaskName
 Write-Host "      Agent is running now - no need to log off or restart."
 
+# --- 6. ERP's own local server, also auto-started at logon --------------------
+# Without this, the "print pops the ERP up automatically" experience only
+# works while someone has manually run Start-ERP.bat / Test-With-Your-Printer.bat
+# and kept that window open - close it, and the agent's Start-Process just
+# opens a browser tab to a server that isn't there. Registering serve.py as
+# its own hidden logon task removes that last manual step entirely.
+$ServerTaskName = "AxeErpLocalServer"
+$ProjectRoot = Split-Path -Parent $PSScriptRoot
+$ServeScript = Join-Path $ProjectRoot "serve.py"
+
+Write-Host ""
+Write-Host "[6/6] Setting the ERP's own local server to start automatically at logon..."
+if (-not (Test-Path $ServeScript)) {
+    Write-Host "      Could not find serve.py next to this installer - skipping automatic ERP startup."
+    Write-Host "      You'll need to start it yourself with Start-ERP.bat or Test-With-Your-Printer.bat."
+} else {
+    $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $pythonCmd) { $pythonCmd = Get-Command python3 -ErrorAction SilentlyContinue }
+    if (-not $pythonCmd) {
+        Write-Host "      Couldn't find Python on this computer, so the ERP server can't start automatically."
+        Write-Host "      Install Python from https://www.python.org/downloads/ (tick 'Add to PATH' during"
+        Write-Host "      setup), then re-run this installer to finish this step."
+    } else {
+        Unregister-ScheduledTask -TaskName $ServerTaskName -Confirm:$false -ErrorAction SilentlyContinue
+
+        $serverAction = New-ScheduledTaskAction -Execute "powershell.exe" `
+            -Argument "-NoProfile -WindowStyle Hidden -Command `"Set-Location -LiteralPath '$ProjectRoot'; & '$($pythonCmd.Source)' serve.py $erpPort`""
+        $serverTrigger = New-ScheduledTaskTrigger -AtLogOn
+        $serverPrincipal = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" -LogonType Interactive -RunLevel Limited
+        $serverSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
+            -StartWhenAvailable -ExecutionTimeLimit ([TimeSpan]::Zero) -MultipleInstances IgnoreNew
+
+        Register-ScheduledTask -TaskName $ServerTaskName -Action $serverAction -Trigger $serverTrigger `
+            -Principal $serverPrincipal -Settings $serverSettings | Out-Null
+
+        # Stop any already-running copy (ours from a previous install, or one
+        # started by hand via Start-ERP.bat) before starting a fresh one -
+        # two processes fighting over the same port would just make the new
+        # one fail silently.
+        Get-CimInstance Win32_Process -Filter "Name = 'python.exe' OR Name = 'pythonw.exe'" -ErrorAction SilentlyContinue |
+            Where-Object { $_.CommandLine -like "*serve.py*" } |
+            ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+
+        Start-ScheduledTask -TaskName $ServerTaskName
+        Start-Sleep -Milliseconds 800
+        Write-Host "      ERP server is running now at $erpUrl - it'll keep running quietly in the"
+        Write-Host "      background from now on, including after a restart. No window to keep open."
+
+        # A Desktop shortcut so there's still an obvious icon to open the ERP
+        # by hand (checking the dashboard, billing, etc.) - not just when a
+        # print job pops it up on its own.
+        try {
+            $desktop = [Environment]::GetFolderPath("Desktop")
+            $shortcutPath = Join-Path $desktop "Axe Printing ERP.url"
+            "[InternetShortcut]`r`nURL=$erpUrl`r`n" | Set-Content -Path $shortcutPath -Encoding ASCII
+            Write-Host "      Added an 'Axe Printing ERP' shortcut to the Desktop."
+        } catch {}
+    }
+}
+
 Write-Host ""
 Write-Host "======================================================="
 Write-Host " Done!"
@@ -211,6 +279,9 @@ Write-Host ""
 Write-Host " One more step in the ERP itself: open Printers / Plotters"
 Write-Host " and set each printer's 'Windows Printer Name' field to"
 Write-Host " match exactly, so a job matches back to the right record."
+Write-Host ""
+Write-Host " That's it - nothing else to run. The ERP and the Print Bridge"
+Write-Host " both start on their own from now on, every time you log in."
 Write-Host "======================================================="
 Write-Host ""
 Read-Host "Press Enter to close this window"

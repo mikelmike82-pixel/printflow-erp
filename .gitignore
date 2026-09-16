@@ -2,3 +2,9 @@
 Thumbs.db
 node_modules/
 *.log
+
+# Built installer binary - rebuild with `makensis axe-printing-erp.nsi`
+# (from the installer/ folder). Keep the .nsi script and .ico tracked;
+# don't commit the compiled .exe itself - it's a binary build artifact,
+# and GitHub Releases is a better home for it than the repo history.
+installer/*.exe
